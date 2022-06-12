@@ -1,0 +1,82 @@
+import time, re
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import smtplib
+from email.message import EmailMessage
+import config
+from selenium.webdriver.chrome.options import Options
+from datetime import date
+
+
+# Headless selenium chrome
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+browser = webdriver.Chrome(options=chrome_options)
+#browser = webdriver.Chrome()  # With head selenium chrome
+
+browser.get("https://www.mycareersfuture.gov.sg/search?search=devops&sortBy=new_posting_date&page=0")
+time.sleep(7)
+soup = BeautifulSoup(browser.page_source, "html.parser")
+
+listings = soup.find_all(id=re.compile("^job-card-\d+"))
+
+coy_keywords = ["yahoo"]  # Exclude company name in lowercase
+job_keywords = ["automation", "devops", "python", "machine learning", "ai", "a.i.", "ci / cd", "ci/cd"]  # Include job title in lowercase
+email_body = ""
+today = date.today()
+company_name_lowercase = ""
+job_title_lowercase = ""
+
+for listing in listings:
+    for date_posted in listing.find(attrs={"data-cy": "job-card-date-info"}):
+        if date_posted.getText() == "Posted yesterday":
+        #if date_posted.getText() == "Posted today":
+            for company_name in listing.find('p'):
+                company_name_lowercase = company_name.getText()
+                if any(word in company_name_lowercase.lower() for word in coy_keywords):
+                    pass
+                else:
+                    for job_title in listing.find('span'):
+                        job_title_lowercase = job_title.getText()
+                        if any(word in job_title_lowercase.lower() for word in job_keywords):
+                            email_body = email_body + company_name.getText() + "\n"
+                            email_body = email_body + job_title.getText() + "\n"
+                            for link in listing.find_all('a'):
+                                email_body = email_body + "https://www.mycareersfuture.gov.sg" + link.get(
+                                    "href") + "\n\n"
+                        else:
+                            pass
+        else:
+            pass
+
+browser.quit()
+
+#print(email_body)
+
+if email_body:
+    message = EmailMessage()
+    message['from'] = "Job Alert <" + config.sender_email + ">"
+    message['to'] = config.receiver_email
+    message['subject'] = "Your job opportunities on " + today.strftime("%a, %d %b")
+
+    body = email_body
+    message.set_content(body)
+
+    mail_server = smtplib.SMTP_SSL(config.smtp_server)
+    mail_server.login(config.sender_email, config.sender_password)
+    mail_server.send_message(message)
+    mail_server.quit()
+else:
+    #pass
+    message = EmailMessage()
+    message['from'] = "Job Alert <" + config.sender_email + ">"
+    message['to'] = config.receiver_email
+    message['subject'] = "No job opportunities on " + today.strftime("%a, %d %b")
+
+    body = "No opportunities yet"
+    message.set_content(body)
+
+    mail_server = smtplib.SMTP_SSL(config.smtp_server)
+    mail_server.login(config.sender_email, config.sender_password)
+    mail_server.send_message(message)
+    mail_server.quit()

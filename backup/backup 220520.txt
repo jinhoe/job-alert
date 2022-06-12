@@ -1,0 +1,57 @@
+import time, re
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import smtplib
+from email.message import EmailMessage
+
+
+browser = webdriver.Chrome()
+browser.get("https://www.mycareersfuture.gov.sg/job/information-technology?schemeIds=2&schemeIds=6&sortBy=new_posting_date&page=0")
+time.sleep(7)
+soup = BeautifulSoup(browser.page_source, "html.parser")
+
+listings = soup.find_all(id=re.compile("^job-card-\d+"))
+
+coy_keywords = ["Amazon", "Apple", "MCITS"]
+job_keywords = ["engineer", "analyst", "it", "senior"]
+email_body = ""
+job_title_lowercase = ""
+
+for listing in listings:
+    for date_posted in listing.find(attrs={"data-cy": "job-card-date-info"}):
+        #if date_posted.getText() == "Posted yesterday":
+        if date_posted.getText() == "Posted 2 days ago":
+            for company_name in listing.find('p'):
+                if company_name.getText() not in coy_keywords:
+                    for job_title in listing.find('span'):
+                        job_title_lowercase = job_title.getText()
+                        if any(word in job_title_lowercase.lower() for word in job_keywords):
+                            email_body = email_body + company_name.getText() + "\n"
+                            email_body = email_body + job_title.getText() + "\n"
+                            for link in listing.find_all('a'):
+                                email_body = email_body + "https://www.mycareersfuture.gov.sg" + link.get("href") + "\n\n"
+                        else:
+                            pass
+                else:
+                    pass
+        else:
+            pass
+
+browser.quit()
+
+print(email_body)
+
+"""
+message = EmailMessage()
+message['from'] = "jh@jinhoe.com"
+message['to'] = "jinhoe@gmail.com"
+message['subject'] = "This is a job alert"
+
+body = email_body
+message.set_content(body)
+
+mail_server = smtplib.SMTP_SSL('mail.jinhoe.com')
+mail_server.login("jh@jinhoe.com", "~@$ft|u$~}d1")
+mail_server.send_message(message)
+mail_server.quit()
+"""

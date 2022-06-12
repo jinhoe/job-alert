@@ -1,0 +1,50 @@
+import time, re
+from selenium import webdriver
+from bs4 import BeautifulSoup
+
+
+browser = webdriver.Chrome()
+browser.get("https://www.mycareersfuture.gov.sg/job/information-technology?schemeIds=2&schemeIds=6&sortBy=new_posting_date&page=0")
+time.sleep(7)
+soup = BeautifulSoup(browser.page_source, "html.parser")
+
+listings = soup.find_all(id=re.compile("^job-card-\d+"))
+
+coy_keywords = ["Amazon", "Apple", "IGUS SINGAPORE PTE LTD"]
+job_keywords = ["Engineer", "Analyst", "Senior Software Engineer", "Senior Technical Consultant", "IT"]
+
+for listing in listings:
+    for date_posted in listing.find(attrs={"data-cy": "job-card-date-info"}):
+        if date_posted.getText() == "Posted yesterday":
+            for company_name in listing.find('p'):
+                if company_name.getText() not in coy_keywords:
+                    for job_title in listing.find('span'):
+                        if job_title.getText() in job_keywords: # Regex
+                            print(company_name.getText())
+                            print(job_title.getText())
+                            for link in listing.find_all('a'):
+                                print(link.get("href"), end="\n\n")
+                        else:
+                            pass
+                else:
+                    pass
+        else:
+            pass
+
+browser.quit()
+
+
+
+#print(link.attrs)
+#print(listings[0].find_all(data-testid="job-card-link"))
+#print(type(listings[0])) # <class 'bs4.element.Tag'>
+#print(listings[0].attrs) # {'id': 'job-card-0'}
+#print(listings[3].prettify()) # Refer job-card.html
+#print(listings[0].get("id", 0))
+
+#print(soup.prettify())
+
+                            email_body = email_body + company_name.getText() + "\n"
+                            email_body = email_body + job_title.getText() + "\n"
+                            for link in listing.find_all('a'):
+                                email_body = email_body + link.get("href") + "\n\n"
