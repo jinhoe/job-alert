@@ -3,13 +3,21 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from decimal import Decimal
+from selenium.webdriver.chrome.service import Service  # Windows
+import platform
 
 
 # Headless selenium chrome
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-browser = webdriver.Chrome(options=chrome_options)
-#browser = webdriver.Chrome()  # With head selenium chrome
+chrome_options = Options()  # Mac
+chrome_options.add_argument("--headless")  # Mac
+#chrome_options.add_argument("--disable-gpu")
+#chrome_options.headless = True
+if platform.system() == "Windows":
+    chromedriver = Service('C:\Chromedriver\chromedriver.exe')
+    browser = webdriver.Chrome(service=chromedriver)
+else:
+    browser = webdriver.Chrome(options=chrome_options)
+    #browser = webdriver.Chrome()  # With head selenium chrome
 
 browser.get("https://www.mycareersfuture.gov.sg/search?search=devops&sortBy=new_posting_date&page=0")
 time.sleep(7)
@@ -27,8 +35,8 @@ convert_lowercase = ""
 for listing in listings:
     # Get yesterday job post
     for date_posted in listing.find(attrs={"data-cy": "job-card-date-info"}):
-        if date_posted.getText() == "Posted yesterday":
-        #if date_posted.getText() == "Posted today":
+        #if date_posted.getText() == "Posted yesterday":
+        if date_posted.getText() == "Posted today":
             # Exclude company name with coy_keywords
             for company_name in listing.find('p'):
                 convert_lowercase = company_name.getText()
@@ -63,10 +71,12 @@ for listing in listings:
             pass
 
 #print(email_body)
+print(soup)
 
 if email_body:
-    #pass
-    emails.job_available(email_body)
+    pass
+    #emails.job_available(email_body)
 else:
     #pass
     emails.job_unavailable()
+
