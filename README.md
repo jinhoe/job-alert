@@ -28,7 +28,7 @@ Below is the daily curated job posting email I receive in my inbox now.
 ![alt text](https://github.com/jinhoe/job-alert/blob/master/job-alert-email-screenshot.png?raw=true)
 
 # Next Challenge
-When this project is working well, I proudly offer to help my wife shorten her job searching time. However she throw me another request. "What about JobStreet?", she asked.
+When this project is working well, I proudly offered to help my wife shorten her job searching time. However she threw me another request. "What about JobStreet?", she asked.
 
 <b>Challenge Accepted!</b>
 
