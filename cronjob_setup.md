@@ -1,4 +1,4 @@
-# Cronjob Setup test
+# Cronjob Setup
 
 ## Give Cron Permission
 1. System Preferences > Security & Privacy > Full Disk Access
