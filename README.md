@@ -23,6 +23,8 @@ The following four pre-defined variables condition must match in order to be lis
 
 <b>expected_salary</b> - If the minimum salary is below my expected amount, the job post will be ignore.
 
+<b>my_exp</b> - Exclude job experience more than my_exp (years)
+
 Below is the daily curated job posting email I receive in my inbox now.
 
 ![alt text](https://github.com/jinhoe/job-alert/blob/master/job-alert-email-screenshot.png?raw=true)
